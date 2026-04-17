@@ -16,6 +16,9 @@
 #   azure      – Azure OpenAI          (AZURE_API_KEY + AZURE_API_BASE)
 #   groq       – Groq (fast inference) (GROQ_API_KEY)
 #   bedrock    – AWS Bedrock           (AWS credentials)
+#
+# Logs: litellm/logs/requests.log (JSON, one entry per request)
+# Dashboard: http://localhost:4000/ui
 # ─────────────────────────────────────────────────────────────────────────────
 
 model_list:

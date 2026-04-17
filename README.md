@@ -259,6 +259,30 @@ ollama pull llama3.2
 
 ---
 
+## Logging & Cost Tracking
+
+All requests through the LiteLLM proxy are logged automatically.
+
+| File | Description |
+|---|---|
+| `litellm/logs/requests.log` | JSON log, one entry per request (rotates at 10 MB, keeps 5 files) |
+| `litellm/logs/litellm.db` | SQLite database used by the dashboard UI |
+
+### View cost summary
+
+```bash
+python3 litellm/log_viewer.py              # last 20 requests
+python3 litellm/log_viewer.py --all        # full history
+python3 litellm/log_viewer.py --summary    # cost summary only
+```
+
+### Dashboard UI
+
+Open **http://localhost:4000/ui** in your browser while the proxy is running.
+Login with the master key: `sk-litellm-proxy` (change it in `litellm/config.yaml`).
+
+---
+
 ## NPM / Bun Scripts
 
 | Script | Command | Description |

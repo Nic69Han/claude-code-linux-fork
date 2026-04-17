@@ -135,11 +135,20 @@ echo ""
 echo "🚀  LiteLLM proxy starting on http://localhost:${PORT}"
 echo "    Backend : $BACKEND"
 echo "    Config  : $CONFIG"
+echo "    Logs    : $SCRIPT_DIR/logs/requests.log"
 echo "    UI      : http://localhost:${PORT}/ui  (open in browser after startup)"
 echo ""
 echo "    Once running, launch Claude Code with:"
 echo "      ./claude-code.sh --litellm --litellm-port ${PORT}"
 echo "    or: ANTHROPIC_BASE_URL=http://localhost:${PORT} bun dist/claude-code.js"
 echo ""
+echo "    View cost summary: python3 litellm/log_viewer.py --summary"
+echo ""
+
+# Ensure logs directory exists
+mkdir -p "$SCRIPT_DIR/logs"
+
+# Enable JSON request logging via environment variable
+export LITELLM_LOG_FILE="$SCRIPT_DIR/logs/requests.log"
 
 exec "$LITELLM_BIN" --config "$CONFIG" --port "$PORT"

@@ -24,3 +24,7 @@ Thumbs.db
 # Logs
 *.log
 node_modules
+
+# LiteLLM logs
+litellm/logs/*.log
+litellm/logs/*.db
