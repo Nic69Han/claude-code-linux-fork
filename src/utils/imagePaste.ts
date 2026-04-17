@@ -94,9 +94,22 @@ export type ImageWithDimensions = {
  * Check if clipboard contains an image without retrieving it.
  */
 export async function hasImageInClipboard(): Promise<boolean> {
-  if (process.platform !== 'darwin') {
+  const platform = process.platform as SupportedPlatform
+
+  if (platform === 'linux') {
+    // Try xclip (X11) first, then wl-paste (Wayland)
+    const { commands } = getClipboardCommands()
+    const result = await execFileNoThrowWithCwd('sh', [
+      '-c',
+      commands.checkImage,
+    ])
+    return result.code === 0 && result.stdout.trim().length > 0
+  }
+
+  if (platform !== 'darwin') {
     return false
   }
+
   if (
     feature('NATIVE_CLIPBOARD_IMAGE') &&
     getFeatureValue_CACHED_MAY_BE_STALE('tengu_collage_kaleidoscope', true)
