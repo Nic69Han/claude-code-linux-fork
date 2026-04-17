@@ -14,6 +14,7 @@
 #   mistral    Mistral AI             (MISTRAL_API_KEY)
 #   azure      Azure OpenAI           (AZURE_API_KEY + AZURE_API_BASE)
 #   groq       Groq fast inference    (GROQ_API_KEY)
+#   mercury    Mercury AI (Inception)  (INCEPTION_API_KEY)
 #   bedrock    AWS Bedrock            (AWS credentials)
 set -euo pipefail
 
@@ -117,6 +118,10 @@ case "$BACKEND" in
     [ -z "${GROQ_API_KEY:-}" ] && warn_missing "GROQ_API_KEY (https://console.groq.com/)" || true
     echo "ℹ️   Uncomment the '── Groq' section in litellm/config.yaml"
     ;;
+  mercury)
+    [ -z "${INCEPTION_API_KEY:-}" ] && warn_missing "INCEPTION_API_KEY (https://platform.inceptionlabs.ai/dashboard/api-keys)" || true
+    echo "ℹ️   Uncomment the '── Mercury AI' section in litellm/config.yaml"
+    ;;
   bedrock)
     [ -z "${AWS_ACCESS_KEY_ID:-}" ]     && warn_missing "AWS_ACCESS_KEY_ID" || true
     [ -z "${AWS_SECRET_ACCESS_KEY:-}" ] && warn_missing "AWS_SECRET_ACCESS_KEY" || true
@@ -125,7 +130,7 @@ case "$BACKEND" in
     ;;
   *)
     echo "❌  Unknown backend: '$BACKEND'"
-    echo "    Available: anthropic, openai, copilot, ollama, mistral, azure, groq, bedrock"
+    echo "    Available: anthropic, openai, copilot, ollama, mistral, azure, groq, mercury, bedrock"
     exit 1
     ;;
 esac

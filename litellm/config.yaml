@@ -176,6 +176,29 @@ model_list:
   #     model: groq/llama-3.1-8b-instant
   #     api_key: os.environ/GROQ_API_KEY
 
+  # ── Mercury AI / Inception Labs ──────────────────────────────────────────────
+  # Env: INCEPTION_API_KEY  (https://platform.inceptionlabs.ai/)
+  # Models: mercury-coder-small, mercury-edit-2
+  # Enable: ./litellm/start.sh --backend mercury
+  #
+  # - model_name: claude-opus-4-6
+  #   litellm_params:
+  #     model: openai/mercury-coder-small
+  #     api_base: https://api.inceptionlabs.ai/v1
+  #     api_key: os.environ/INCEPTION_API_KEY
+  #
+  # - model_name: claude-sonnet-4-6
+  #   litellm_params:
+  #     model: openai/mercury-coder-small
+  #     api_base: https://api.inceptionlabs.ai/v1
+  #     api_key: os.environ/INCEPTION_API_KEY
+  #
+  # - model_name: claude-3-5-haiku-20241022
+  #   litellm_params:
+  #     model: openai/mercury-coder-small
+  #     api_base: https://api.inceptionlabs.ai/v1
+  #     api_key: os.environ/INCEPTION_API_KEY
+
   # ── AWS Bedrock ──────────────────────────────────────────────────────────────
   # Env: AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION_NAME
   # Enable: ./litellm/start.sh --backend bedrock

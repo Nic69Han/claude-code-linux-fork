@@ -196,6 +196,7 @@ Edit `litellm/config.yaml` and uncomment the block for your provider.
 | OpenAI | `OPENAI_API_KEY` | `# ── OpenAI` section |
 | GitHub Copilot | `GITHUB_TOKEN` | `# ── GitHub Copilot` section |
 | Ollama (local) | none | `# ── Ollama` section |
+| Mercury AI (Inception) | `INCEPTION_API_KEY` | `# ── Mercury AI` section |
 | Mistral AI | `MISTRAL_API_KEY` | `# ── Mistral AI` section |
 | Azure OpenAI | `AZURE_API_KEY` + `AZURE_API_BASE` | `# ── Azure OpenAI` section |
 | Groq | `GROQ_API_KEY` | `# ── Groq` section |
@@ -209,6 +210,7 @@ Edit `litellm/config.yaml` and uncomment the block for your provider.
 ./litellm/start.sh --backend openai
 ./litellm/start.sh --backend copilot
 ./litellm/start.sh --backend ollama
+./litellm/start.sh --backend mercury
 ./litellm/start.sh --backend mistral
 ./litellm/start.sh --backend azure
 ./litellm/start.sh --backend groq
@@ -228,6 +230,17 @@ Or manually:
 ```bash
 ANTHROPIC_BASE_URL=http://localhost:4000 bun dist/claude-code.js
 ```
+
+### Mercury AI (Inception Labs)
+
+```bash
+export INCEPTION_API_KEY=your_key   # https://platform.inceptionlabs.ai/
+# Uncomment the "── Mercury AI" section in litellm/config.yaml
+./litellm/start.sh --backend mercury
+./claude-code.sh --litellm
+```
+
+> **Models**: `mercury-coder-small`, `mercury-edit-2` — diffusion-based coding models from Inception Labs with 10M free tokens on signup.
 
 ### Mistral AI
 
