@@ -6,6 +6,10 @@
 # Disable macOS/Windows-only feature flags at build time
 "feature('VOICE_MODE')" = "false"
 
+[bundle.alias]
+# Redirect color-diff-napi to the bundled TypeScript port (no native .node needed)
+"color-diff-napi" = "./src/native-ts/color-diff/index.ts"
+
 [install]
 # Ignore optional native packages that are macOS/Windows only
 optional = true
