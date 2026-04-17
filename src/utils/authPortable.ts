@@ -12,6 +12,9 @@ export async function maybeRemoveApiKeyFromMacOSKeychainThrows(): Promise<void> 
       throw new Error('Failed to delete keychain entry')
     }
   }
+
+  // On Linux, legacy API key cleanup is handled by linuxSecretServiceStorage.delete()
+  // via getSecureStorage() — no additional action needed here.
 }
 
 export function normalizeApiKeyForConfig(apiKey: string): string {
