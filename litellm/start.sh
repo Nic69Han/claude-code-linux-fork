@@ -58,27 +58,12 @@ echo "🐍  Using $PYTHON_VERSION ($PYTHON)"
 PIP="$PYTHON -m pip"
 
 # ── Install LiteLLM if needed ─────────────────────────────────────────────────
-LITELLM_BIN=""
-for candidate in litellm "$HOME/.local/bin/litellm" "$($PYTHON -m site --user-base 2>/dev/null)/bin/litellm"; do
-  if command -v "$candidate" &>/dev/null || [ -x "$candidate" ]; then
-    LITELLM_BIN="$candidate"
-    break
-  fi
-done
-
-if [ -z "$LITELLM_BIN" ]; then
+if ! $PYTHON -c "import litellm" &>/dev/null; then
   echo "📦  Installing LiteLLM (using $PYTHON)..."
   $PIP install 'litellm[proxy]' --quiet --user
-  # Refresh PATH
-  export PATH="$HOME/.local/bin:$PATH"
-  if command -v litellm &>/dev/null; then
-    LITELLM_BIN="litellm"
-  else
-    LITELLM_BIN="$PYTHON -m litellm"
-  fi
   echo "✅  LiteLLM installed."
 else
-  echo "✅  LiteLLM found: $LITELLM_BIN"
+  echo "✅  LiteLLM module found."
 fi
 
 # ── Backend validation ────────────────────────────────────────────────────────
@@ -148,9 +133,4 @@ echo ""
 LITELLM_ARGS=(--config "$CONFIG" --port "$PORT")
 [ "$ENABLE_UI" = true ] && LITELLM_ARGS+=(--ui)
 
-if [ "$LITELLM_BIN" = "litellm" ] || [ -x "$LITELLM_BIN" ]; then
-  exec $LITELLM_BIN "${LITELLM_ARGS[@]}"
-else
-  # Fallback: run as module
-  exec $PYTHON -m litellm "${LITELLM_ARGS[@]}"
-fi
+exec $PYTHON -m litellm "${LITELLM_ARGS[@]}"
