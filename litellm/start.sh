@@ -2,7 +2,9 @@
 # LiteLLM proxy launcher for Claude Code — Linux Fork
 #
 # Usage:
-#   ./litellm/start.sh [--backend <name>] [--port 4000] [--no-ui]
+#   ./litellm/start.sh [--backend <name>] [--port 4000]
+#
+# The web UI is available at http://localhost:<port>/ui automatically.
 #
 # Backends:
 #   anthropic  Anthropic direct API   (ANTHROPIC_API_KEY)
@@ -19,15 +21,12 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CONFIG="$SCRIPT_DIR/config.yaml"
 PORT=4000
 BACKEND="anthropic"
-ENABLE_UI=true
 
 # ── Parse args ────────────────────────────────────────────────────────────────
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --backend) BACKEND="$2"; shift 2 ;;
     --port)    PORT="$2";    shift 2 ;;
-    --ui)      ENABLE_UI=true; shift ;;
-    --no-ui)   ENABLE_UI=false; shift ;;
     -h|--help)
       sed -n '2,12p' "$0" | sed 's/^# //; s/^#//'
       exit 0 ;;
@@ -136,16 +135,11 @@ echo ""
 echo "🚀  LiteLLM proxy starting on http://localhost:${PORT}"
 echo "    Backend : $BACKEND"
 echo "    Config  : $CONFIG"
-if [ "$ENABLE_UI" = true ]; then
-  echo "    UI      : http://localhost:${PORT}/ui"
-fi
+echo "    UI      : http://localhost:${PORT}/ui  (open in browser after startup)"
 echo ""
 echo "    Once running, launch Claude Code with:"
 echo "      ./claude-code.sh --litellm --litellm-port ${PORT}"
 echo "    or: ANTHROPIC_BASE_URL=http://localhost:${PORT} bun dist/claude-code.js"
 echo ""
 
-LITELLM_ARGS=(--config "$CONFIG" --port "$PORT")
-[ "$ENABLE_UI" = true ] && LITELLM_ARGS+=(--ui)
-
-exec "$LITELLM_BIN" "${LITELLM_ARGS[@]}"
+exec "$LITELLM_BIN" --config "$CONFIG" --port "$PORT"
