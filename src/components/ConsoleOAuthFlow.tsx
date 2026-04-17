@@ -403,7 +403,7 @@ function OAuthStatusMessage(t0) {
         let t6;
         if ($[5] === Symbol.for("react.memo_cache_sentinel")) {
           t6 = [t4, t5, {
-            label: <Text>3rd-party platform ·{" "}<Text dimColor={true}>Amazon Bedrock, Microsoft Foundry, or Vertex AI</Text>{"\n"}</Text>,
+            label: <Text>3rd-party platform ·{" "}<Text dimColor={true}>Amazon Bedrock, Microsoft Foundry, Vertex AI, or LiteLLM</Text>{"\n"}</Text>,
             value: "platform"
           }];
           $[5] = t6;
@@ -460,7 +460,7 @@ function OAuthStatusMessage(t0) {
         let t2;
         let t3;
         if ($[13] === Symbol.for("react.memo_cache_sentinel")) {
-          t2 = <Text>Claude Code supports Amazon Bedrock, Microsoft Foundry, and Vertex AI. Set the required environment variables, then restart Claude Code.</Text>;
+          t2 = <Text>Claude Code supports Amazon Bedrock, Microsoft Foundry, Vertex AI, and LiteLLM (proxy for OpenAI, Ollama, Mistral, Groq, and more). Set the required environment variables, then restart Claude Code.</Text>;
           t3 = <Text>If you are part of an enterprise organization, contact your administrator for setup instructions.</Text>;
           $[13] = t2;
           $[14] = t3;
@@ -491,7 +491,7 @@ function OAuthStatusMessage(t0) {
         }
         let t7;
         if ($[18] === Symbol.for("react.memo_cache_sentinel")) {
-          t7 = <Box flexDirection="column" marginTop={1}>{t4}{t5}{t6}<Text>· Vertex AI:{" "}<Link url="https://code.claude.com/docs/en/google-vertex-ai">https://code.claude.com/docs/en/google-vertex-ai</Link></Text></Box>;
+          t7 = <Box flexDirection="column" marginTop={1}>{t4}{t5}{t6}<Text>· Vertex AI:{" "}<Link url="https://code.claude.com/docs/en/google-vertex-ai">https://code.claude.com/docs/en/google-vertex-ai</Link></Text><Text>· LiteLLM proxy:{" "}<Link url="https://github.com/Nic69Han/claude-code-linux-fork#litellm--third-party-model-support">https://github.com/Nic69Han/claude-code-linux-fork</Link>{"\n"}  Start proxy: ./litellm/start.sh  →  set ANTHROPIC_BASE_URL=http://localhost:4000</Text></Box>;
           $[18] = t7;
         } else {
           t7 = $[18];
