@@ -1,12 +1,11 @@
 #!/usr/bin/env bash
 # Claude Code — Linux Fork launcher
-# Builds (if needed) and starts the Claude Code CLI.
-# Optionally routes API calls through a local LiteLLM proxy.
 #
 # Usage:
 #   ./claude-code.sh                        # Direct Anthropic API
 #   ./claude-code.sh --litellm              # Via LiteLLM proxy (port 4000)
 #   ./claude-code.sh --litellm-port 8080    # Via LiteLLM on custom port
+#   ./claude-code.sh --update               # Pull latest + rebuild
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -14,6 +13,16 @@ DIST="$SCRIPT_DIR/dist/claude-code.js"
 BUN="${BUN_PATH:-$HOME/.bun/bin/bun}"
 LITELLM_PORT=4000
 USE_LITELLM=false
+DO_UPDATE=false
+
+# ── Load .env if present ──────────────────────────────────────────────────────
+if [ -f "$SCRIPT_DIR/.env" ]; then
+  # Export only KEY=value lines, skip comments and blanks
+  set -a
+  # shellcheck disable=SC1090
+  source <(grep -E '^[A-Z_]+=.' "$SCRIPT_DIR/.env" | grep -v '^#')
+  set +a
+fi
 
 # ── Parse launcher-specific flags (consume before passing rest to the app) ────
 PASSTHROUGH_ARGS=()
@@ -21,6 +30,7 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     --litellm)        USE_LITELLM=true; shift ;;
     --litellm-port)   USE_LITELLM=true; LITELLM_PORT="$2"; shift 2 ;;
+    --update)         DO_UPDATE=true; shift ;;
     *)                PASSTHROUGH_ARGS+=("$1"); shift ;;
   esac
 done
@@ -32,9 +42,25 @@ if ! command -v bun &>/dev/null && [ ! -x "$BUN" ]; then
   echo "    source ~/.bashrc"
   exit 1
 fi
-
-# Use the system bun if available, otherwise fall back to ~/.bun/bin/bun
 command -v bun &>/dev/null && BUN=bun
+
+# ── Auto-update ───────────────────────────────────────────────────────────────
+if [ "$DO_UPDATE" = true ]; then
+  echo "🔄  Updating Claude Code..."
+  if [ -d "$SCRIPT_DIR/.git" ]; then
+    git -C "$SCRIPT_DIR" pull --ff-only
+  else
+    echo "⚠️  Not a git repository — skipping git pull."
+  fi
+  echo "🔨  Rebuilding..."
+  "$BUN" install --frozen-lockfile 2>&1 | tail -2
+  "$BUN" build "$SCRIPT_DIR/src/entrypoints/cli.tsx" \
+    --outfile="$DIST" \
+    --target=bun \
+    --define 'MACRO.VERSION="99.0.0+linux-fork"'
+  echo "✅  Update complete."
+  exit 0
+fi
 
 # ── Build if dist is missing ─────────────────────────────────────────────────
 if [ ! -f "$DIST" ]; then
@@ -48,13 +74,10 @@ fi
 
 # ── LiteLLM proxy ────────────────────────────────────────────────────────────
 if [ "$USE_LITELLM" = true ]; then
-  # Check if LiteLLM proxy is already running on the target port
   if ! curl -sf "http://localhost:${LITELLM_PORT}/health" &>/dev/null; then
     echo "⚠️  LiteLLM proxy not detected on port ${LITELLM_PORT}."
     echo "    Start it first with: ./litellm/start.sh --port ${LITELLM_PORT}"
-    echo "    Or install LiteLLM: pip install 'litellm[proxy]'"
-    echo ""
-    echo "    Continuing without LiteLLM (falling back to direct Anthropic API)."
+    echo "    Continuing with direct Anthropic API."
   else
     echo "✅  LiteLLM proxy active on port ${LITELLM_PORT}."
     export ANTHROPIC_BASE_URL="http://localhost:${LITELLM_PORT}"
@@ -62,7 +85,6 @@ if [ "$USE_LITELLM" = true ]; then
 fi
 
 # ── Launch ───────────────────────────────────────────────────────────────────
-# If called from a GUI shortcut, open a terminal emulator; otherwise run inline.
 if [ -t 0 ]; then
   exec "$BUN" "$DIST" "${PASSTHROUGH_ARGS[@]+"${PASSTHROUGH_ARGS[@]}"}"
 else

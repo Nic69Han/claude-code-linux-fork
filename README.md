@@ -23,7 +23,29 @@ Claude Code is a terminal AI assistant built by Anthropic that lets you interact
 
 ---
 
-## Installation
+## Installation rapide (one-liner)
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Nic69Han/claude-code-linux-fork/master/install.sh | bash
+```
+
+Ce script :
+- Clone le dépôt dans `~/.local/share/claude-code`
+- Installe Bun si absent
+- Lance `bun install` + build
+- Crée le raccourci desktop
+- Ajoute `claude-code` dans votre `$PATH`
+
+Options disponibles :
+```bash
+./install.sh --dir /custom/path   # répertoire d'installation personnalisé
+./install.sh --no-desktop         # sans raccourci GUI
+./install.sh --no-build           # sans build (juste clone + deps)
+```
+
+---
+
+## Installation manuelle
 
 ### 1. Clone the repository
 
@@ -45,14 +67,21 @@ source ~/.bashrc   # or restart your terminal
 bun install
 ```
 
-### 4. Build
+### 4. Configure API key
+
+```bash
+cp .env.example .env
+# Edit .env and set ANTHROPIC_API_KEY=sk-ant-...
+```
+
+### 5. Build
 
 ```bash
 bun run build
 # output: dist/claude-code.js
 ```
 
-### 5. Run
+### 6. Run
 
 ```bash
 # From the project root:
@@ -62,10 +91,18 @@ bun run build
 bun dist/claude-code.js
 ```
 
-The `claude-code.sh` script at the root of the project:
-- Detects your Bun installation automatically (no hardcoded paths)
+The `claude-code.sh` script:
+- Loads `.env` automatically if present
+- Detects Bun automatically (no hardcoded paths)
 - Builds the app if `dist/claude-code.js` is missing
-- Runs inline when called from a terminal, or opens a new terminal window when launched from a GUI shortcut
+- Runs inline in terminal, or opens a new terminal window from a GUI shortcut
+
+### Update
+
+```bash
+./claude-code.sh --update
+# Pulls latest commits + reinstalls deps + rebuilds
+```
 
 ---
 
