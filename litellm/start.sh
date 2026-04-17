@@ -35,17 +35,50 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-# ── Check Python ──────────────────────────────────────────────────────────────
-if ! command -v python3 &>/dev/null; then
-  echo "❌  Python 3 is required: sudo apt install python3 python3-pip"
+# ── Check Python ≥ 3.9 ───────────────────────────────────────────────────────
+PYTHON=""
+for candidate in python3.12 python3.11 python3.10 python3.9 python3; do
+  if command -v "$candidate" &>/dev/null; then
+    ver=$("$candidate" -c 'import sys; print(sys.version_info >= (3,9))')
+    if [ "$ver" = "True" ]; then
+      PYTHON="$candidate"
+      break
+    fi
+  fi
+done
+
+if [ -z "$PYTHON" ]; then
+  echo "❌  Python 3.9+ is required but not found."
+  echo "    Install it with: sudo apt install python3.11  (or 3.10, 3.12…)"
   exit 1
 fi
 
+PYTHON_VERSION=$("$PYTHON" --version)
+echo "🐍  Using $PYTHON_VERSION ($PYTHON)"
+PIP="$PYTHON -m pip"
+
 # ── Install LiteLLM if needed ─────────────────────────────────────────────────
-if ! command -v litellm &>/dev/null; then
-  echo "📦  Installing LiteLLM..."
-  pip install 'litellm[proxy]' --quiet
+LITELLM_BIN=""
+for candidate in litellm "$HOME/.local/bin/litellm" "$($PYTHON -m site --user-base 2>/dev/null)/bin/litellm"; do
+  if command -v "$candidate" &>/dev/null || [ -x "$candidate" ]; then
+    LITELLM_BIN="$candidate"
+    break
+  fi
+done
+
+if [ -z "$LITELLM_BIN" ]; then
+  echo "📦  Installing LiteLLM (using $PYTHON)..."
+  $PIP install 'litellm[proxy]' --quiet --user
+  # Refresh PATH
+  export PATH="$HOME/.local/bin:$PATH"
+  if command -v litellm &>/dev/null; then
+    LITELLM_BIN="litellm"
+  else
+    LITELLM_BIN="$PYTHON -m litellm"
+  fi
   echo "✅  LiteLLM installed."
+else
+  echo "✅  LiteLLM found: $LITELLM_BIN"
 fi
 
 # ── Backend validation ────────────────────────────────────────────────────────
@@ -115,4 +148,9 @@ echo ""
 LITELLM_ARGS=(--config "$CONFIG" --port "$PORT")
 [ "$ENABLE_UI" = true ] && LITELLM_ARGS+=(--ui)
 
-exec litellm "${LITELLM_ARGS[@]}"
+if [ "$LITELLM_BIN" = "litellm" ] || [ -x "$LITELLM_BIN" ]; then
+  exec $LITELLM_BIN "${LITELLM_ARGS[@]}"
+else
+  # Fallback: run as module
+  exec $PYTHON -m litellm "${LITELLM_ARGS[@]}"
+fi
