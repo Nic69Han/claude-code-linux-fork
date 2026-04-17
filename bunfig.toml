@@ -1,0 +1,11 @@
+[bundle]
+# Resolve "src/*" imports relative to the project root
+# This mirrors the original Anthropic build path alias
+
+[bundle.define]
+# Disable macOS/Windows-only feature flags at build time
+"feature('VOICE_MODE')" = "false"
+
+[install]
+# Ignore optional native packages that are macOS/Windows only
+optional = true

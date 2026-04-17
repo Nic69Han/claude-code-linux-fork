@@ -1,0 +1,25 @@
+# Dépendances
+node_modules/
+dist/
+
+# Fichiers générés
+bun.lockb
+*.js.map
+
+# Environnement
+.env
+.env.local
+*.env
+
+# Éditeurs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
