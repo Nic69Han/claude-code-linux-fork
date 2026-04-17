@@ -168,8 +168,11 @@ Edit `litellm/config.yaml` and uncomment the block for your provider.
 **3. Start the proxy**
 
 ```bash
-# Anthropic backend (default)
+# With web UI (default) — open http://localhost:4000/ui after starting
 ./litellm/start.sh
+
+# Without UI
+./litellm/start.sh --no-ui
 
 # Other backends
 ./litellm/start.sh --backend openai
