@@ -94,6 +94,87 @@ Replace `/path/to/claude-code-linux-fork/` with the actual path where you cloned
 
 ---
 
+## LiteLLM — Third-Party Model Support
+
+[LiteLLM](https://github.com/BerriAI/litellm) acts as an Anthropic-compatible proxy that routes Claude Code's API calls to any supported backend: OpenAI, GitHub Copilot, Mistral, Ollama (local), and more.
+
+### How it works
+
+```
+Claude Code  →  LiteLLM proxy (port 4000)  →  OpenAI / Copilot / Ollama / …
+              (speaks Anthropic API)          (translates to target provider)
+```
+
+### Quick start
+
+**1. Install LiteLLM**
+
+```bash
+pip install 'litellm[proxy]'
+```
+
+**2. Configure your backend**
+
+Edit `litellm/config.yaml` and uncomment the block for your provider.
+
+| Backend | Env var required | Comment block to uncomment |
+|---|---|---|
+| Anthropic (default) | `ANTHROPIC_API_KEY` | Already active |
+| OpenAI | `OPENAI_API_KEY` | `# ── OpenAI` section |
+| GitHub Copilot | `GITHUB_TOKEN` | `# ── GitHub Copilot` section |
+| Ollama (local) | none | `# ── Ollama` section |
+
+**3. Start the proxy**
+
+```bash
+# Anthropic backend (default)
+./litellm/start.sh
+
+# Other backends
+./litellm/start.sh --backend openai
+./litellm/start.sh --backend copilot
+./litellm/start.sh --backend ollama
+./litellm/start.sh --port 8080        # custom port
+```
+
+**4. Launch Claude Code via the proxy**
+
+```bash
+./claude-code.sh --litellm
+./claude-code.sh --litellm --litellm-port 8080   # custom port
+```
+
+Or manually:
+
+```bash
+ANTHROPIC_BASE_URL=http://localhost:4000 bun dist/claude-code.js
+```
+
+### GitHub Copilot setup
+
+```bash
+# Get a GitHub token with copilot scope
+# https://github.com/settings/tokens → New token → check "copilot"
+export GITHUB_TOKEN=ghp_your_token_here
+
+# Uncomment the "── GitHub Copilot" section in litellm/config.yaml
+./litellm/start.sh --backend copilot
+./claude-code.sh --litellm
+```
+
+### Ollama (fully local, no API key)
+
+```bash
+# Install Ollama from https://ollama.com then pull a model
+ollama pull llama3.2
+
+# Uncomment the "── Ollama" section in litellm/config.yaml
+./litellm/start.sh --backend ollama
+./claude-code.sh --litellm
+```
+
+---
+
 ## NPM / Bun Scripts
 
 | Script | Command | Description |

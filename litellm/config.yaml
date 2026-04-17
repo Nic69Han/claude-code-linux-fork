@@ -1,0 +1,111 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# LiteLLM Proxy — Claude Code Linux Fork
+#
+# Maps Anthropic model names (used internally by Claude Code) to any backend
+# supported by LiteLLM (OpenAI, GitHub Copilot, Mistral, Ollama, etc.)
+#
+# Usage:
+#   litellm --config litellm/config.yaml --port 4000
+# Then launch Claude Code with:
+#   ANTHROPIC_BASE_URL=http://localhost:4000 bun dist/claude-code.js
+# Or simply:
+#   ./claude-code.sh --litellm
+# ─────────────────────────────────────────────────────────────────────────────
+
+model_list:
+
+  # ── Anthropic (direct, requires ANTHROPIC_API_KEY) ──────────────────────────
+  - model_name: claude-opus-4-6
+    litellm_params:
+      model: anthropic/claude-opus-4-6
+      api_key: os.environ/ANTHROPIC_API_KEY
+
+  - model_name: claude-sonnet-4-6
+    litellm_params:
+      model: anthropic/claude-sonnet-4-6
+      api_key: os.environ/ANTHROPIC_API_KEY
+
+  - model_name: claude-3-7-sonnet-20250219
+    litellm_params:
+      model: anthropic/claude-3-7-sonnet-20250219
+      api_key: os.environ/ANTHROPIC_API_KEY
+
+  - model_name: claude-3-5-sonnet-20241022
+    litellm_params:
+      model: anthropic/claude-3-5-sonnet-20241022
+      api_key: os.environ/ANTHROPIC_API_KEY
+
+  - model_name: claude-3-5-haiku-20241022
+    litellm_params:
+      model: anthropic/claude-3-5-haiku-20241022
+      api_key: os.environ/ANTHROPIC_API_KEY
+
+  # ── OpenAI (requires OPENAI_API_KEY) ────────────────────────────────────────
+  # Uncomment and set LITELLM_BACKEND=openai to use these instead.
+  #
+  # - model_name: claude-opus-4-6
+  #   litellm_params:
+  #     model: openai/gpt-4o
+  #     api_key: os.environ/OPENAI_API_KEY
+  #
+  # - model_name: claude-sonnet-4-6
+  #   litellm_params:
+  #     model: openai/gpt-4o-mini
+  #     api_key: os.environ/OPENAI_API_KEY
+  #
+  # - model_name: claude-3-5-haiku-20241022
+  #   litellm_params:
+  #     model: openai/gpt-4o-mini
+  #     api_key: os.environ/OPENAI_API_KEY
+
+  # ── GitHub Copilot (requires GITHUB_TOKEN with copilot scope) ───────────────
+  # Uncomment and set LITELLM_BACKEND=copilot to use these instead.
+  #
+  # - model_name: claude-opus-4-6
+  #   litellm_params:
+  #     model: openai/gpt-4o
+  #     api_base: https://api.githubcopilot.com
+  #     api_key: os.environ/GITHUB_TOKEN
+  #
+  # - model_name: claude-sonnet-4-6
+  #   litellm_params:
+  #     model: openai/gpt-4o
+  #     api_base: https://api.githubcopilot.com
+  #     api_key: os.environ/GITHUB_TOKEN
+  #
+  # - model_name: claude-3-5-haiku-20241022
+  #   litellm_params:
+  #     model: openai/gpt-4o-mini
+  #     api_base: https://api.githubcopilot.com
+  #     api_key: os.environ/GITHUB_TOKEN
+
+  # ── Ollama (local, no API key needed) ───────────────────────────────────────
+  # Uncomment and set LITELLM_BACKEND=ollama to use these instead.
+  # Make sure to run: ollama pull llama3.2 / ollama pull mistral
+  #
+  # - model_name: claude-opus-4-6
+  #   litellm_params:
+  #     model: ollama/llama3.2
+  #     api_base: http://localhost:11434
+  #
+  # - model_name: claude-sonnet-4-6
+  #   litellm_params:
+  #     model: ollama/mistral
+  #     api_base: http://localhost:11434
+  #
+  # - model_name: claude-3-5-haiku-20241022
+  #   litellm_params:
+  #     model: ollama/mistral
+  #     api_base: http://localhost:11434
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Server settings
+# ─────────────────────────────────────────────────────────────────────────────
+litellm_settings:
+  # Allow unknown model names to pass through (useful for custom model IDs)
+  drop_params: true
+  # Retry on failure
+  num_retries: 2
+
+general_settings:
+  master_key: sk-litellm-proxy    # Change this in production
