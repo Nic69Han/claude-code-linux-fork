@@ -7,8 +7,8 @@
   "type": "module",
   "scripts": {
     "start": "bun run src/entrypoints/cli.tsx",
-    "build": "bun build src/entrypoints/cli.tsx --outfile=dist/claude-code.js --target=bun --define 'MACRO.VERSION=\"0.0.0-linux-fork\"'",
-    "build:dev": "bun build src/entrypoints/cli.tsx --outfile=dist/claude-code.js --target=bun --define 'MACRO.VERSION=\"0.0.0-linux-fork\"' --sourcemap=inline",
+    "build": "bun build src/entrypoints/cli.tsx --outfile=dist/claude-code.js --target=bun --define 'MACRO.VERSION=\"99.0.0+linux-fork\"'",
+    "build:dev": "bun build src/entrypoints/cli.tsx --outfile=dist/claude-code.js --target=bun --define 'MACRO.VERSION=\"99.0.0+linux-fork\"' --sourcemap=inline",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
