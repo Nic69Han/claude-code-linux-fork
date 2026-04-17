@@ -58,12 +58,27 @@ echo "🐍  Using $PYTHON_VERSION ($PYTHON)"
 PIP="$PYTHON -m pip"
 
 # ── Install LiteLLM if needed ─────────────────────────────────────────────────
-if ! $PYTHON -c "import litellm" &>/dev/null; then
-  echo "📦  Installing LiteLLM (using $PYTHON)..."
-  $PIP install 'litellm[proxy]' --quiet --user
+# Resolve the litellm binary — avoid confusing it with our local litellm/ dir
+LITELLM_BIN=""
+
+# Check ~/.local/bin first (uv tool / pip --user installs)
+if [ -x "$HOME/.local/bin/litellm" ]; then
+  LITELLM_BIN="$HOME/.local/bin/litellm"
+fi
+
+if [ -z "$LITELLM_BIN" ]; then
+  echo "📦  Installing LiteLLM..."
+  if command -v uv &>/dev/null; then
+    uv tool install 'litellm[proxy]' --python "$PYTHON" 2>&1 | tail -3
+  else
+    $PIP install 'litellm[proxy]' --quiet --user
+  fi
+  # Ensure ~/.local/bin is in PATH for this session
+  export PATH="$HOME/.local/bin:$PATH"
+  LITELLM_BIN="$HOME/.local/bin/litellm"
   echo "✅  LiteLLM installed."
 else
-  echo "✅  LiteLLM module found."
+  echo "✅  LiteLLM found: $LITELLM_BIN"
 fi
 
 # ── Backend validation ────────────────────────────────────────────────────────
@@ -133,4 +148,4 @@ echo ""
 LITELLM_ARGS=(--config "$CONFIG" --port "$PORT")
 [ "$ENABLE_UI" = true ] && LITELLM_ARGS+=(--ui)
 
-exec $PYTHON -m litellm "${LITELLM_ARGS[@]}"
+exec "$LITELLM_BIN" "${LITELLM_ARGS[@]}"
