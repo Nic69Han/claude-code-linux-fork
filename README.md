@@ -1,32 +1,111 @@
-# Claude Code — Leaked Source (2026-03-31)
+# Claude Code — Linux Fork
 
-> **On March 31, 2026, the full source code of Anthropic's Claude Code CLI was leaked** via a `.map` file exposed in their npm registry.
+> Community Linux port of Anthropic's Claude Code CLI, based on the source published on 2026-03-31.
+
+Claude Code is a terminal AI assistant built by Anthropic that lets you interact with Claude directly from the command line to perform software engineering tasks — editing files, running commands, searching codebases, managing git workflows, and more.
+
+- **Language**: TypeScript (strict)
+- **Runtime**: [Bun](https://bun.sh)
+- **Terminal UI**: React + [Ink](https://github.com/vadimdemedes/ink)
+- **Scale**: ~1,900 files, 512,000+ lines of code
 
 ---
 
-## How It Leaked
+## Requirements
 
-[Chaofan Shou (@Fried_rice)](https://x.com/Fried_rice) discovered the leak and posted it publicly:
+| Dependency | Version | Install |
+|---|---|---|
+| [Bun](https://bun.sh) | ≥ 1.1 | `curl -fsSL https://bun.sh/install \| bash` |
+| [ripgrep](https://github.com/BurntSushi/ripgrep) | any | `sudo apt install ripgrep` / `brew install ripgrep` |
+| Node.js (optional) | ≥ 18 | only needed if you prefer `node` tooling |
 
-> **"Claude code source code has been leaked via a map file in their npm registry!"**
->
-> — [@Fried_rice, March 31, 2026](https://x.com/Fried_rice/status/2038894956459290963)
+> **Linux users**: a supported terminal emulator is required to use the GUI launcher (`gnome-terminal`, `xterm`, `konsole`, `xfce4-terminal`, `lxterminal`, or `tilix`).
 
-The source map file in the published npm package contained a reference to the full, unobfuscated TypeScript source, which was downloadable as a zip archive from Anthropic's R2 storage bucket.
+---
+
+## Installation
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/Nic69Han/claude-code-linux-fork.git
+cd claude-code-linux-fork
+```
+
+### 2. Install Bun (if not already installed)
+
+```bash
+curl -fsSL https://bun.sh/install | bash
+source ~/.bashrc   # or restart your terminal
+```
+
+### 3. Install dependencies
+
+```bash
+bun install
+```
+
+### 4. Build
+
+```bash
+bun run build
+# output: dist/claude-code.js
+```
+
+### 5. Run
+
+```bash
+# From the project root:
+./claude-code.sh
+
+# Or directly:
+bun dist/claude-code.js
+```
+
+The `claude-code.sh` script at the root of the project:
+- Detects your Bun installation automatically (no hardcoded paths)
+- Builds the app if `dist/claude-code.js` is missing
+- Runs inline when called from a terminal, or opens a new terminal window when launched from a GUI shortcut
+
+---
+
+## GUI Shortcut (Linux Desktop)
+
+To add a clickable shortcut in your Linux desktop environment:
+
+```bash
+# Create the .desktop launcher (adjust paths as needed)
+cat > ~/.local/share/applications/claude-code.desktop << EOF
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Claude Code
+Comment=Claude Code CLI — Linux Fork
+Exec=/path/to/claude-code-linux-fork/claude-code.sh
+Terminal=false
+Categories=Development;Utility;
+StartupNotify=true
+EOF
+
+update-desktop-database ~/.local/share/applications/
+```
+
+Replace `/path/to/claude-code-linux-fork/` with the actual path where you cloned the repo.
+
+---
+
+## NPM / Bun Scripts
+
+| Script | Command | Description |
+|---|---|---|
+| `start` | `bun run src/entrypoints/cli.tsx` | Run from source (dev, no build step) |
+| `build` | `bun run build` | Production build to `dist/claude-code.js` |
+| `build:dev` | `bun run build:dev` | Dev build with inline source maps |
+| `typecheck` | `bun run typecheck` | TypeScript type-check only (no emit) |
 
 ---
 
 ## Overview
-
-Claude Code is Anthropic's official CLI tool that lets you interact with Claude directly from the terminal to perform software engineering tasks — editing files, running commands, searching codebases, managing git workflows, and more.
-
-This repository contains the leaked `src/` directory.
-
-- **Leaked on**: 2026-03-31
-- **Language**: TypeScript
-- **Runtime**: Bun
-- **Terminal UI**: React + [Ink](https://github.com/vadimdemedes/ink) (React for CLI)
-- **Scale**: ~1,900 files, 512,000+ lines of code
 
 ---
 
@@ -252,6 +331,55 @@ Built-in and third-party plugins are loaded through the `plugins/` subsystem.
 
 ---
 
+## Dependency Documentation
+
+### Runtime — Bun
+
+[Bun](https://bun.sh) is a fast all-in-one JavaScript runtime (bundler, package manager, test runner). It is required to build and run this project.
+
+- Replaces Node.js for execution
+- Used for bundling (`bun build`) with compile-time `--define` macros
+- Install: `curl -fsSL https://bun.sh/install | bash`
+
+### Terminal UI — Ink + React
+
+[Ink](https://github.com/vadimdemedes/ink) is a React renderer for the terminal. Claude Code's entire UI is built with React components that render to the terminal instead of a browser DOM. React 19 is used.
+
+### API — Anthropic SDK
+
+`@anthropic-ai/sdk` handles all communication with the Anthropic API (claude-3-x, claude-opus, etc.). Bedrock and Vertex AI variants are also bundled for enterprise deployments.
+
+### CLI Parsing — Commander.js
+
+`commander` + `@commander-js/extra-typings` provides the CLI argument parser with full TypeScript inference.
+
+### Schema Validation — Zod
+
+`zod` is used throughout for runtime schema validation of tool inputs, config files, and API responses.
+
+### Protocols
+
+- `@modelcontextprotocol/sdk` — MCP (Model Context Protocol) server connection
+- `vscode-languageserver-protocol` — LSP integration for code intelligence
+
+### Telemetry — OpenTelemetry
+
+Full OpenTelemetry stack (traces, metrics, logs) with exporters for gRPC, HTTP, and Prometheus. Used for optional self-hosted observability.
+
+### Search — ripgrep
+
+The `GrepTool` relies on the `ripgrep` binary being present on the system PATH. Install via your system package manager (`apt install ripgrep`, `brew install ripgrep`, etc.).
+
+### Feature Flags — GrowthBook
+
+`@growthbook/growthbook` provides runtime feature flag evaluation. Some features (voice, proactive mode, agent triggers) are gated behind flags.
+
+### Image Processing — Sharp
+
+`sharp` (native module) is used for image resizing and format conversion when passing screenshots or images to the model.
+
+---
+
 ## Disclaimer
 
-This repository archives source code that was leaked from Anthropic's npm registry on **2026-03-31**. All original source code is the property of [Anthropic](https://www.anthropic.com).
+This repository is based on source code published from Anthropic's npm registry on **2026-03-31**. All original source code is the property of [Anthropic](https://www.anthropic.com). This fork is maintained for educational and Linux compatibility purposes.
