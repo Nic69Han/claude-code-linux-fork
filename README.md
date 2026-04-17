@@ -160,6 +160,10 @@ Edit `litellm/config.yaml` and uncomment the block for your provider.
 | OpenAI | `OPENAI_API_KEY` | `# ── OpenAI` section |
 | GitHub Copilot | `GITHUB_TOKEN` | `# ── GitHub Copilot` section |
 | Ollama (local) | none | `# ── Ollama` section |
+| Mistral AI | `MISTRAL_API_KEY` | `# ── Mistral AI` section |
+| Azure OpenAI | `AZURE_API_KEY` + `AZURE_API_BASE` | `# ── Azure OpenAI` section |
+| Groq | `GROQ_API_KEY` | `# ── Groq` section |
+| AWS Bedrock | `AWS_ACCESS_KEY_ID` + `AWS_SECRET_ACCESS_KEY` + `AWS_REGION_NAME` | `# ── AWS Bedrock` section |
 
 **3. Start the proxy**
 
@@ -171,6 +175,10 @@ Edit `litellm/config.yaml` and uncomment the block for your provider.
 ./litellm/start.sh --backend openai
 ./litellm/start.sh --backend copilot
 ./litellm/start.sh --backend ollama
+./litellm/start.sh --backend mistral
+./litellm/start.sh --backend azure
+./litellm/start.sh --backend groq
+./litellm/start.sh --backend bedrock
 ./litellm/start.sh --port 8080        # custom port
 ```
 
@@ -186,6 +194,47 @@ Or manually:
 ```bash
 ANTHROPIC_BASE_URL=http://localhost:4000 bun dist/claude-code.js
 ```
+
+### Mistral AI
+
+```bash
+export MISTRAL_API_KEY=your_key   # https://console.mistral.ai/
+# Uncomment the "── Mistral AI" section in litellm/config.yaml
+./litellm/start.sh --backend mistral
+./claude-code.sh --litellm
+```
+
+### Azure OpenAI
+
+```bash
+export AZURE_API_KEY=your_key
+export AZURE_API_BASE=https://my-resource.openai.azure.com/
+# Edit litellm/config.yaml: uncomment "── Azure OpenAI", replace <deployment-name>
+./litellm/start.sh --backend azure
+./claude-code.sh --litellm
+```
+
+### Groq (ultra-fast inference)
+
+```bash
+export GROQ_API_KEY=your_key   # https://console.groq.com/
+# Uncomment the "── Groq" section in litellm/config.yaml
+./litellm/start.sh --backend groq
+./claude-code.sh --litellm
+```
+
+### AWS Bedrock via LiteLLM
+
+```bash
+export AWS_ACCESS_KEY_ID=...
+export AWS_SECRET_ACCESS_KEY=...
+export AWS_REGION_NAME=us-east-1
+# Uncomment the "── AWS Bedrock" section in litellm/config.yaml
+./litellm/start.sh --backend bedrock
+./claude-code.sh --litellm
+```
+
+> **Note**: Claude models on Bedrock can also be used natively (without LiteLLM) via `CLAUDE_CODE_USE_BEDROCK=1` in your `.env`.
 
 ### GitHub Copilot setup
 

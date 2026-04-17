@@ -1,14 +1,18 @@
 #!/usr/bin/env bash
 # LiteLLM proxy launcher for Claude Code — Linux Fork
-# Installs LiteLLM (if needed) and starts the Anthropic-compatible proxy.
 #
 # Usage:
-#   ./litellm/start.sh [--backend anthropic|openai|copilot|ollama] [--port 4000]
+#   ./litellm/start.sh [--backend <name>] [--port 4000]
 #
-# After starting, launch Claude Code with:
-#   ./claude-code.sh --litellm
-#   or
-#   ANTHROPIC_BASE_URL=http://localhost:4000 bun dist/claude-code.js
+# Backends:
+#   anthropic  Anthropic direct API   (ANTHROPIC_API_KEY)
+#   openai     OpenAI API             (OPENAI_API_KEY)
+#   copilot    GitHub Copilot         (GITHUB_TOKEN)
+#   ollama     Ollama local           (no key needed)
+#   mistral    Mistral AI             (MISTRAL_API_KEY)
+#   azure      Azure OpenAI           (AZURE_API_KEY + AZURE_API_BASE)
+#   groq       Groq fast inference    (GROQ_API_KEY)
+#   bedrock    AWS Bedrock            (AWS credentials)
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -21,13 +25,16 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     --backend) BACKEND="$2"; shift 2 ;;
     --port)    PORT="$2";    shift 2 ;;
+    -h|--help)
+      sed -n '2,12p' "$0" | sed 's/^# //; s/^#//'
+      exit 0 ;;
     *) echo "Unknown option: $1"; exit 1 ;;
   esac
 done
 
 # ── Check Python ──────────────────────────────────────────────────────────────
 if ! command -v python3 &>/dev/null; then
-  echo "❌  Python 3 is required. Install it with: sudo apt install python3 python3-pip"
+  echo "❌  Python 3 is required: sudo apt install python3 python3-pip"
   exit 1
 fi
 
@@ -38,38 +45,65 @@ if ! command -v litellm &>/dev/null; then
   echo "✅  LiteLLM installed."
 fi
 
-# ── Validate backend-specific env vars ───────────────────────────────────────
+# ── Backend validation ────────────────────────────────────────────────────────
+warn_missing() { echo "⚠️   $1 is not set — set it in .env or export it before running."; }
+
 case "$BACKEND" in
   anthropic)
-    [ -z "${ANTHROPIC_API_KEY:-}" ] && echo "⚠️  ANTHROPIC_API_KEY is not set." || true
+    [ -z "${ANTHROPIC_API_KEY:-}" ] && warn_missing "ANTHROPIC_API_KEY" || true
     ;;
   openai)
-    [ -z "${OPENAI_API_KEY:-}" ] && echo "⚠️  OPENAI_API_KEY is not set." || true
-    echo "ℹ️  Using OpenAI backend. Uncomment OpenAI blocks in litellm/config.yaml."
+    [ -z "${OPENAI_API_KEY:-}" ] && warn_missing "OPENAI_API_KEY" || true
+    echo "ℹ️   Uncomment the '── OpenAI' section in litellm/config.yaml"
     ;;
   copilot)
-    [ -z "${GITHUB_TOKEN:-}" ] && echo "⚠️  GITHUB_TOKEN is not set. Get one at: https://github.com/settings/tokens" || true
-    echo "ℹ️  Using GitHub Copilot backend. Uncomment Copilot blocks in litellm/config.yaml."
+    [ -z "${GITHUB_TOKEN:-}" ] && warn_missing "GITHUB_TOKEN (needs copilot scope — https://github.com/settings/tokens)" || true
+    echo "ℹ️   Uncomment the '── GitHub Copilot' section in litellm/config.yaml"
     ;;
   ollama)
-    command -v ollama &>/dev/null || echo "⚠️  Ollama not found. Install it from https://ollama.com"
-    echo "ℹ️  Using Ollama backend. Uncomment Ollama blocks in litellm/config.yaml."
+    if ! command -v ollama &>/dev/null; then
+      echo "⚠️   Ollama not found. Install from https://ollama.com"
+    else
+      echo "ℹ️   Available Ollama models: $(ollama list 2>/dev/null | tail -n +2 | awk '{print $1}' | tr '\n' ' ' || echo 'none')"
+    fi
+    echo "ℹ️   Uncomment the '── Ollama' section in litellm/config.yaml"
+    ;;
+  mistral)
+    [ -z "${MISTRAL_API_KEY:-}" ] && warn_missing "MISTRAL_API_KEY (https://console.mistral.ai/)" || true
+    echo "ℹ️   Uncomment the '── Mistral AI' section in litellm/config.yaml"
+    ;;
+  azure)
+    [ -z "${AZURE_API_KEY:-}" ]  && warn_missing "AZURE_API_KEY" || true
+    [ -z "${AZURE_API_BASE:-}" ] && warn_missing "AZURE_API_BASE (e.g. https://my-resource.openai.azure.com/)" || true
+    echo "ℹ️   Uncomment the '── Azure OpenAI' section in litellm/config.yaml"
+    echo "ℹ️   Replace <deployment-name> with your actual Azure deployment names."
+    ;;
+  groq)
+    [ -z "${GROQ_API_KEY:-}" ] && warn_missing "GROQ_API_KEY (https://console.groq.com/)" || true
+    echo "ℹ️   Uncomment the '── Groq' section in litellm/config.yaml"
+    ;;
+  bedrock)
+    [ -z "${AWS_ACCESS_KEY_ID:-}" ]     && warn_missing "AWS_ACCESS_KEY_ID" || true
+    [ -z "${AWS_SECRET_ACCESS_KEY:-}" ] && warn_missing "AWS_SECRET_ACCESS_KEY" || true
+    [ -z "${AWS_REGION_NAME:-}" ]       && warn_missing "AWS_REGION_NAME (e.g. us-east-1)" || true
+    echo "ℹ️   Uncomment the '── AWS Bedrock' section in litellm/config.yaml"
     ;;
   *)
-    echo "❌  Unknown backend: $BACKEND. Choose: anthropic, openai, copilot, ollama"
+    echo "❌  Unknown backend: '$BACKEND'"
+    echo "    Available: anthropic, openai, copilot, ollama, mistral, azure, groq, bedrock"
     exit 1
     ;;
 esac
 
 # ── Start proxy ───────────────────────────────────────────────────────────────
 echo ""
-echo "🚀  Starting LiteLLM proxy on http://localhost:${PORT}"
+echo "🚀  LiteLLM proxy starting on http://localhost:${PORT}"
 echo "    Backend : $BACKEND"
 echo "    Config  : $CONFIG"
 echo ""
-echo "    Launch Claude Code with:"
-echo "    ANTHROPIC_BASE_URL=http://localhost:${PORT} bun dist/claude-code.js"
-echo "    or: ./claude-code.sh --litellm --litellm-port ${PORT}"
+echo "    Once running, launch Claude Code with:"
+echo "      ./claude-code.sh --litellm --litellm-port ${PORT}"
+echo "    or: ANTHROPIC_BASE_URL=http://localhost:${PORT} bun dist/claude-code.js"
 echo ""
 
 exec litellm --config "$CONFIG" --port "$PORT"

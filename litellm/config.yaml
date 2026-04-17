@@ -1,20 +1,27 @@
 # ─────────────────────────────────────────────────────────────────────────────
 # LiteLLM Proxy — Claude Code Linux Fork
 #
-# Maps Anthropic model names (used internally by Claude Code) to any backend
-# supported by LiteLLM (OpenAI, GitHub Copilot, Mistral, Ollama, etc.)
+# Maps Anthropic model names (used internally by Claude Code) to any LiteLLM
+# backend. Only ONE section should be active at a time.
 #
-# Usage:
-#   litellm --config litellm/config.yaml --port 4000
-# Then launch Claude Code with:
-#   ANTHROPIC_BASE_URL=http://localhost:4000 bun dist/claude-code.js
-# Or simply:
-#   ./claude-code.sh --litellm
+# Quick start:
+#   ./litellm/start.sh --backend <name>
+#
+# Available backends:
+#   anthropic  – Anthropic direct API  (ANTHROPIC_API_KEY)
+#   openai     – OpenAI API            (OPENAI_API_KEY)
+#   copilot    – GitHub Copilot        (GITHUB_TOKEN)
+#   ollama     – Ollama local          (no key)
+#   mistral    – Mistral AI            (MISTRAL_API_KEY)
+#   azure      – Azure OpenAI          (AZURE_API_KEY + AZURE_API_BASE)
+#   groq       – Groq (fast inference) (GROQ_API_KEY)
+#   bedrock    – AWS Bedrock           (AWS credentials)
 # ─────────────────────────────────────────────────────────────────────────────
 
 model_list:
 
-  # ── Anthropic (direct, requires ANTHROPIC_API_KEY) ──────────────────────────
+  # ── Anthropic (direct) ───────────────────────────────────────────────────────
+  # Env: ANTHROPIC_API_KEY
   - model_name: claude-opus-4-6
     litellm_params:
       model: anthropic/claude-opus-4-6
@@ -40,8 +47,9 @@ model_list:
       model: anthropic/claude-3-5-haiku-20241022
       api_key: os.environ/ANTHROPIC_API_KEY
 
-  # ── OpenAI (requires OPENAI_API_KEY) ────────────────────────────────────────
-  # Uncomment and set LITELLM_BACKEND=openai to use these instead.
+  # ── OpenAI ───────────────────────────────────────────────────────────────────
+  # Env: OPENAI_API_KEY
+  # Enable: ./litellm/start.sh --backend openai
   #
   # - model_name: claude-opus-4-6
   #   litellm_params:
@@ -50,7 +58,7 @@ model_list:
   #
   # - model_name: claude-sonnet-4-6
   #   litellm_params:
-  #     model: openai/gpt-4o-mini
+  #     model: openai/gpt-4o
   #     api_key: os.environ/OPENAI_API_KEY
   #
   # - model_name: claude-3-5-haiku-20241022
@@ -58,8 +66,9 @@ model_list:
   #     model: openai/gpt-4o-mini
   #     api_key: os.environ/OPENAI_API_KEY
 
-  # ── GitHub Copilot (requires GITHUB_TOKEN with copilot scope) ───────────────
-  # Uncomment and set LITELLM_BACKEND=copilot to use these instead.
+  # ── GitHub Copilot ───────────────────────────────────────────────────────────
+  # Env: GITHUB_TOKEN (needs copilot scope)
+  # Enable: ./litellm/start.sh --backend copilot
   #
   # - model_name: claude-opus-4-6
   #   litellm_params:
@@ -79,9 +88,9 @@ model_list:
   #     api_base: https://api.githubcopilot.com
   #     api_key: os.environ/GITHUB_TOKEN
 
-  # ── Ollama (local, no API key needed) ───────────────────────────────────────
-  # Uncomment and set LITELLM_BACKEND=ollama to use these instead.
-  # Make sure to run: ollama pull llama3.2 / ollama pull mistral
+  # ── Ollama (local, no API key) ───────────────────────────────────────────────
+  # Prereq: ollama pull llama3.2   /   ollama pull mistral
+  # Enable: ./litellm/start.sh --backend ollama
   #
   # - model_name: claude-opus-4-6
   #   litellm_params:
@@ -98,14 +107,108 @@ model_list:
   #     model: ollama/mistral
   #     api_base: http://localhost:11434
 
+  # ── Mistral AI ───────────────────────────────────────────────────────────────
+  # Env: MISTRAL_API_KEY  (https://console.mistral.ai/)
+  # Enable: ./litellm/start.sh --backend mistral
+  #
+  # - model_name: claude-opus-4-6
+  #   litellm_params:
+  #     model: mistral/mistral-large-latest
+  #     api_key: os.environ/MISTRAL_API_KEY
+  #
+  # - model_name: claude-sonnet-4-6
+  #   litellm_params:
+  #     model: mistral/mistral-large-latest
+  #     api_key: os.environ/MISTRAL_API_KEY
+  #
+  # - model_name: claude-3-5-haiku-20241022
+  #   litellm_params:
+  #     model: mistral/mistral-small-latest
+  #     api_key: os.environ/MISTRAL_API_KEY
+
+  # ── Azure OpenAI ─────────────────────────────────────────────────────────────
+  # Env: AZURE_API_KEY, AZURE_API_BASE (e.g. https://my-res.openai.azure.com/)
+  #      AZURE_API_VERSION (optional, default: 2024-02-01)
+  # Enable: ./litellm/start.sh --backend azure
+  #
+  # Replace <deployment-name> with your Azure deployment names.
+  #
+  # - model_name: claude-opus-4-6
+  #   litellm_params:
+  #     model: azure/<deployment-name>
+  #     api_base: os.environ/AZURE_API_BASE
+  #     api_key: os.environ/AZURE_API_KEY
+  #     api_version: "2024-02-01"
+  #
+  # - model_name: claude-sonnet-4-6
+  #   litellm_params:
+  #     model: azure/<deployment-name>
+  #     api_base: os.environ/AZURE_API_BASE
+  #     api_key: os.environ/AZURE_API_KEY
+  #     api_version: "2024-02-01"
+  #
+  # - model_name: claude-3-5-haiku-20241022
+  #   litellm_params:
+  #     model: azure/<deployment-name>
+  #     api_base: os.environ/AZURE_API_BASE
+  #     api_key: os.environ/AZURE_API_KEY
+  #     api_version: "2024-02-01"
+
+  # ── Groq (ultra-fast inference) ──────────────────────────────────────────────
+  # Env: GROQ_API_KEY  (https://console.groq.com/)
+  # Enable: ./litellm/start.sh --backend groq
+  #
+  # - model_name: claude-opus-4-6
+  #   litellm_params:
+  #     model: groq/llama-3.3-70b-versatile
+  #     api_key: os.environ/GROQ_API_KEY
+  #
+  # - model_name: claude-sonnet-4-6
+  #   litellm_params:
+  #     model: groq/llama-3.3-70b-versatile
+  #     api_key: os.environ/GROQ_API_KEY
+  #
+  # - model_name: claude-3-5-haiku-20241022
+  #   litellm_params:
+  #     model: groq/llama-3.1-8b-instant
+  #     api_key: os.environ/GROQ_API_KEY
+
+  # ── AWS Bedrock ──────────────────────────────────────────────────────────────
+  # Env: AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION_NAME
+  # Enable: ./litellm/start.sh --backend bedrock
+  #
+  # Note: Claude models on Bedrock can also be used natively without LiteLLM
+  # by setting CLAUDE_CODE_USE_BEDROCK=1. Use LiteLLM Bedrock to route to
+  # non-Claude models (Llama, Titan, Mistral on Bedrock).
+  #
+  # - model_name: claude-opus-4-6
+  #   litellm_params:
+  #     model: bedrock/meta.llama3-70b-instruct-v1:0
+  #     aws_access_key_id: os.environ/AWS_ACCESS_KEY_ID
+  #     aws_secret_access_key: os.environ/AWS_SECRET_ACCESS_KEY
+  #     aws_region_name: os.environ/AWS_REGION_NAME
+  #
+  # - model_name: claude-sonnet-4-6
+  #   litellm_params:
+  #     model: bedrock/meta.llama3-8b-instruct-v1:0
+  #     aws_access_key_id: os.environ/AWS_ACCESS_KEY_ID
+  #     aws_secret_access_key: os.environ/AWS_SECRET_ACCESS_KEY
+  #     aws_region_name: os.environ/AWS_REGION_NAME
+  #
+  # - model_name: claude-3-5-haiku-20241022
+  #   litellm_params:
+  #     model: bedrock/meta.llama3-8b-instruct-v1:0
+  #     aws_access_key_id: os.environ/AWS_ACCESS_KEY_ID
+  #     aws_secret_access_key: os.environ/AWS_SECRET_ACCESS_KEY
+  #     aws_region_name: os.environ/AWS_REGION_NAME
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Server settings
 # ─────────────────────────────────────────────────────────────────────────────
 litellm_settings:
-  # Allow unknown model names to pass through (useful for custom model IDs)
-  drop_params: true
-  # Retry on failure
+  drop_params: true    # pass unknown params through (needed for Anthropic features)
   num_retries: 2
+  request_timeout: 600
 
 general_settings:
   master_key: sk-litellm-proxy    # Change this in production
