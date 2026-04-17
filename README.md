@@ -131,6 +131,42 @@ Replace `/path/to/claude-code-linux-fork/` with the actual path where you cloned
 
 ---
 
+## GitHub Copilot CLI
+
+`gh copilot` is GitHub's AI assistant for the shell — complementary to Claude Code. It suggests and explains terminal commands in natural language.
+
+### Install
+
+```bash
+# Install GitHub CLI if not already present
+sudo apt install gh          # Debian/Ubuntu
+brew install gh              # macOS
+
+# Login
+gh auth login
+
+# Install the Copilot extension (one-time)
+./copilot-cli.sh --install
+# or: gh extension install github/gh-copilot
+```
+
+### Usage
+
+```bash
+./copilot-cli.sh                              # interactive menu
+./copilot-cli.sh suggest "compress a folder"  # get a shell command
+./copilot-cli.sh explain "tar -czf ..."       # explain a command
+```
+
+A desktop shortcut **GitHub Copilot CLI** is also created by `install.sh`.
+
+| Tool | Best for |
+|---|---|
+| **Claude Code** (`./claude-code.sh`) | Full coding sessions, file editing, multi-step tasks |
+| **GitHub Copilot CLI** (`./copilot-cli.sh`) | Quick one-off shell commands and explanations |
+
+---
+
 ## LiteLLM — Third-Party Model Support
 
 [LiteLLM](https://github.com/BerriAI/litellm) acts as an Anthropic-compatible proxy that routes Claude Code's API calls to any supported backend: OpenAI, GitHub Copilot, Mistral, Ollama (local), and more.

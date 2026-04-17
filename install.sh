@@ -153,8 +153,24 @@ StartupNotify=true
 EOF
 
   chmod +x "$DESKTOP_DIR/claude-code.desktop"
+
+  # GitHub Copilot CLI shortcut
+  cat > "$DESKTOP_DIR/gh-copilot-cli.desktop" << EOF
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=GitHub Copilot CLI
+Comment=GitHub Copilot — Shell command AI assistant
+Exec=$INSTALL_DIR/copilot-cli.sh
+Icon=utilities-terminal
+Terminal=false
+Categories=Development;Utility;
+StartupNotify=true
+EOF
+  chmod +x "$DESKTOP_DIR/gh-copilot-cli.desktop"
+
   update-desktop-database "$DESKTOP_DIR" 2>/dev/null || true
-  success "Desktop shortcut created"
+  success "Desktop shortcuts created (Claude Code + GitHub Copilot CLI)"
 fi
 
 # ── 8. Symlink in PATH ────────────────────────────────────────────────────────
@@ -168,6 +184,12 @@ if [ -L "$SYMLINK_DIR/claude-code" ] || [ -f "$SYMLINK_DIR/claude-code" ]; then
 fi
 ln -s "$INSTALL_DIR/claude-code.sh" "$SYMLINK_DIR/claude-code"
 
+# Symlink copilot-cli
+if [ -L "$SYMLINK_DIR/copilot-cli" ] || [ -f "$SYMLINK_DIR/copilot-cli" ]; then
+  rm -f "$SYMLINK_DIR/copilot-cli"
+fi
+ln -s "$INSTALL_DIR/copilot-cli.sh" "$SYMLINK_DIR/copilot-cli"
+
 # Ensure ~/.local/bin is in PATH
 for RC in "$HOME/.bashrc" "$HOME/.zshrc"; do
   if [ -f "$RC" ] && ! grep -q '.local/bin' "$RC"; then
@@ -175,7 +197,7 @@ for RC in "$HOME/.bashrc" "$HOME/.zshrc"; do
   fi
 done
 export PATH="$SYMLINK_DIR:$PATH"
-success "Symlink created: claude-code → $INSTALL_DIR/claude-code.sh"
+success "Symlinks created: claude-code + copilot-cli → $INSTALL_DIR"
 
 # ── Done ──────────────────────────────────────────────────────────────────────
 echo ""
@@ -183,6 +205,7 @@ echo -e "${BOLD}${GREEN}✅  Installation complete!${NC}"
 echo ""
 echo "  Launch from terminal:  claude-code"
 echo "  Launch from GUI:       Search 'Claude Code' in your app menu"
+echo "  GitHub Copilot CLI:    copilot-cli  (or Search 'GitHub Copilot CLI')"
 echo "  Update anytime:        claude-code --update"
 echo ""
 if [ ! -f "$INSTALL_DIR/.env" ] || ! grep -q 'ANTHROPIC_API_KEY=.' "$INSTALL_DIR/.env" 2>/dev/null; then
