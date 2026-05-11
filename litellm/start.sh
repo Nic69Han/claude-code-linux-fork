@@ -16,6 +16,7 @@
 #   groq       Groq fast inference    (GROQ_API_KEY)
 #   mercury    Mercury AI (Inception)  (INCEPTION_API_KEY)
 #   bedrock    AWS Bedrock            (AWS credentials)
+#   minimax    MiniMax AI             (MINIMAX_API_KEY)
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -122,6 +123,11 @@ case "$BACKEND" in
     [ -z "${INCEPTION_API_KEY:-}" ] && warn_missing "INCEPTION_API_KEY (https://platform.inceptionlabs.ai/dashboard/api-keys)" || true
     echo "ℹ️   Uncomment the '── Mercury AI' section in litellm/config.yaml"
     ;;
+  minimax)
+    [ -z "${MINIMAX_API_KEY:-}" ] && warn_missing "MINIMAX_API_KEY (https://platform.minimax.io/)" || true
+    echo "ℹ️   MiniMax models are pre-configured in litellm/config.yaml"
+    echo "ℹ️   International: https://api.minimax.io/v1 | China: https://api.minimaxi.com/v1"
+    ;;
   bedrock)
     [ -z "${AWS_ACCESS_KEY_ID:-}" ]     && warn_missing "AWS_ACCESS_KEY_ID" || true
     [ -z "${AWS_SECRET_ACCESS_KEY:-}" ] && warn_missing "AWS_SECRET_ACCESS_KEY" || true
@@ -130,7 +136,7 @@ case "$BACKEND" in
     ;;
   *)
     echo "❌  Unknown backend: '$BACKEND'"
-    echo "    Available: anthropic, openai, copilot, ollama, mistral, azure, groq, mercury, bedrock"
+    echo "    Available: anthropic, openai, copilot, ollama, mistral, azure, groq, mercury, bedrock, minimax"
     exit 1
     ;;
 esac

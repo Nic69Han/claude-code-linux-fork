@@ -201,6 +201,7 @@ Edit `litellm/config.yaml` and uncomment the block for your provider.
 | Azure OpenAI | `AZURE_API_KEY` + `AZURE_API_BASE` | `# ── Azure OpenAI` section |
 | Groq | `GROQ_API_KEY` | `# ── Groq` section |
 | AWS Bedrock | `AWS_ACCESS_KEY_ID` + `AWS_SECRET_ACCESS_KEY` + `AWS_REGION_NAME` | `# ── AWS Bedrock` section |
+| MiniMax AI | `MINIMAX_API_KEY` | Already active |
 
 **3. Start the proxy**
 
@@ -215,6 +216,7 @@ Edit `litellm/config.yaml` and uncomment the block for your provider.
 ./litellm/start.sh --backend azure
 ./litellm/start.sh --backend groq
 ./litellm/start.sh --backend bedrock
+./litellm/start.sh --backend minimax
 ./litellm/start.sh --port 8080        # custom port
 ```
 
@@ -250,6 +252,18 @@ export MISTRAL_API_KEY=your_key   # https://console.mistral.ai/
 ./litellm/start.sh --backend mistral
 ./claude-code.sh --litellm
 ```
+
+### MiniMax AI
+
+```bash
+export MINIMAX_API_KEY=your_key   # https://platform.minimax.io/
+./litellm/start.sh --backend minimax
+./claude-code.sh --litellm
+```
+
+> **Models**: `minimax-text-01` (high quality), `minimax-text-01-turbo` (fast), `minimax-m2.7b` (compact) — MiniMax's multilingual coding models.
+>
+> **API Endpoints**: International: `https://api.minimax.io/v1` | China: `https://api.minimaxi.com/v1`
 
 ### Azure OpenAI
 

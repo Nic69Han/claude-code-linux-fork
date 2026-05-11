@@ -16,6 +16,7 @@
 #   azure      – Azure OpenAI          (AZURE_API_KEY + AZURE_API_BASE)
 #   groq       – Groq (fast inference) (GROQ_API_KEY)
 #   bedrock    – AWS Bedrock           (AWS credentials)
+#   minimax    – MiniMax AI            (MINIMAX_API_KEY)
 #
 # Logs: litellm/logs/requests.log (JSON, one entry per request)
 # Dashboard: http://localhost:4000/ui
@@ -198,6 +199,36 @@ model_list:
   #     model: openai/mercury-coder-small
   #     api_base: https://api.inceptionlabs.ai/v1
   #     api_key: os.environ/INCEPTION_API_KEY
+
+  # ── MiniMax AI ────────────────────────────────────────────────────────────────
+  # Env: MINIMAX_API_KEY  (https://platform.minimax.io/)
+  # Base URL: https://api.minimax.io/v1 (international) or https://api.minimaxi.com/v1 (China)
+  # Models: MiniMax-Text-01, MiniMax-Text-01-Turbo, MiniMax-M2.7B
+  # Enable: ./litellm/start.sh --backend minimax
+  #
+  - model_name: claude-opus-4-6
+    litellm_params:
+      model: minimax/minimax-text-01
+      api_base: https://api.minimax.io/v1
+      api_key: os.environ/MINIMAX_API_KEY
+      extra_headers:
+        MM-Application: claude-code-linux-fork
+  #
+  - model_name: claude-sonnet-4-6
+    litellm_params:
+      model: minimax/minimax-text-01-turbo
+      api_base: https://api.minimax.io/v1
+      api_key: os.environ/MINIMAX_API_KEY
+      extra_headers:
+        MM-Application: claude-code-linux-fork
+  #
+  - model_name: claude-3-5-haiku-20241022
+    litellm_params:
+      model: minimax/minimax-m2.7b
+      api_base: https://api.minimax.io/v1
+      api_key: os.environ/MINIMAX_API_KEY
+      extra_headers:
+        MM-Application: claude-code-linux-fork
 
   # ── AWS Bedrock ──────────────────────────────────────────────────────────────
   # Env: AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION_NAME
